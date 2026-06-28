@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Biblioteca de física nuclear para cálculo de decaimento"
 authors = ["Priscila Floriano <priscilabflorian@icloud.com>"]
 readme = "README.md"
+repository = "https://github.com/prifloriano/nucleonpy"
 packages = [{include = "nucleonpy", from = "src"}]
 
 [tool.poetry.dependencies]
