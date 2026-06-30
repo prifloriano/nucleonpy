@@ -8,7 +8,7 @@ Para utilizar o `nucleonpy` em seus projetos, você pode instalá-lo diretamente
 
 ```bash
 # Clone o repositório
-git clone [https://github.com/seu-usuario/nucleonpy.git](https://github.com/seu-usuario/nucleonpy.git)
+git clone [https://github.com/prifloriano/nucleonpy.git](https://github.com/prifloriano/nucleonpy.git)
 cd nucleonpy
 
 # Instale o pacote no modo editável
