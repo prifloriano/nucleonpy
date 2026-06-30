@@ -75,3 +75,47 @@ def test_isotope_loads_known_isotope():
     assert isotope.atomic_number == 1
     assert isotope.decay_mode == "B-"
     assert isotope.half_life > 0
+
+def test_remaining_activity_rejects_negative_initial_amount():
+    with pytest.raises(ValueError):
+        calculate_remaining_activity(
+            initial_amount=-1.0,
+            half_life_seconds=10.0,
+            time_elapsed_seconds=5.0,
+        )
+
+
+def test_remaining_activity_rejects_negative_elapsed_time():
+    with pytest.raises(ValueError):
+        calculate_remaining_activity(
+            initial_amount=100.0,
+            half_life_seconds=10.0,
+            time_elapsed_seconds=-5.0,
+        )
+
+
+def test_bateman_chain_rejects_empty_half_lives():
+    with pytest.raises(ValueError):
+        calculate_bateman_chain(
+            initial_amount=100.0,
+            half_lives_seconds=[],
+            time_elapsed_seconds=10.0,
+        )
+
+
+def test_bateman_chain_rejects_stable_isotope_before_end():
+    with pytest.raises(ValueError):
+        calculate_bateman_chain(
+            initial_amount=100.0,
+            half_lives_seconds=[math.inf, 10.0],
+            time_elapsed_seconds=10.0,
+        )
+
+
+def test_bateman_chain_rejects_equal_half_lives():
+    with pytest.raises(ValueError):
+        calculate_bateman_chain(
+            initial_amount=100.0,
+            half_lives_seconds=[10.0, 10.0, math.inf],
+            time_elapsed_seconds=10.0,
+        )
