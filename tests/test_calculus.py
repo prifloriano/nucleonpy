@@ -76,6 +76,7 @@ def test_isotope_loads_known_isotope():
     assert isotope.decay_mode == "B-"
     assert isotope.half_life > 0
 
+
 def test_remaining_activity_rejects_negative_initial_amount():
     with pytest.raises(ValueError):
         calculate_remaining_activity(

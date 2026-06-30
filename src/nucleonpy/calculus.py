@@ -62,16 +62,14 @@ def _validate_decay_chain(
 
     for index, half_life in enumerate(half_lives_seconds[:-1]):
         if math.isinf(half_life):
-            raise ValueError(
-                "Apenas o último isótopo da cadeia pode ser estável."
-            )
+            raise ValueError("Apenas o último isótopo da cadeia pode ser estável.")
 
     finite_half_lives = [
         half_life for half_life in half_lives_seconds if not math.isinf(half_life)
     ]
 
     for i, half_life in enumerate(finite_half_lives):
-        for other_half_life in finite_half_lives[i + 1:]:
+        for other_half_life in finite_half_lives[i + 1 :]:
             if math.isclose(half_life, other_half_life, rel_tol=1e-12):
                 raise ValueError(
                     "Cadeias com meias-vidas iguais ou muito próximas ainda "
@@ -118,9 +116,7 @@ def calculate_bateman_chain(
 
     for n in range(n_elements):
         if n == 0:
-            results[n] = initial_amount * math.exp(
-                -lambdas[0] * time_elapsed_seconds
-            )
+            results[n] = initial_amount * math.exp(-lambdas[0] * time_elapsed_seconds)
             continue
 
         amount_n = 0.0

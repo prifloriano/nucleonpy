@@ -1,17 +1,32 @@
 # nucleonpy
 
-`nucleonpy` é uma biblioteca científica em Python para cálculo e visualização de decaimento radioativo.
+`nucleonpy` é uma biblioteca científica em Python para cálculo, consulta, simulação e visualização de decaimento radioativo.
 
-O pacote foi criado para facilitar análises envolvendo meia-vida, atividade remanescente e cadeias lineares de decaimento usando as equações de Bateman. A proposta é oferecer uma API simples para estudos, prototipação científica e aplicações educacionais em física nuclear.
+O pacote foi criado para facilitar análises envolvendo meia-vida, atividade remanescente, cadeias lineares de decaimento, equações de Bateman e dados nucleares obtidos a partir da IAEA.
+
+> Status: projeto em fase alpha.
 
 ## Recursos
 
-* Cálculo de atividade ou quantidade remanescente após determinado tempo
+* Cálculo de quantidade ou atividade remanescente
 * Simulação de cadeias lineares de decaimento radioativo
 * Implementação das equações de Bateman
 * Base interna de isótopos
-* Interface orientada a objetos com a classe `Isotope`
-* Visualização de cadeias de decaimento com Matplotlib
+* Metadados sobre a fonte dos dados nucleares
+* Normalização automática de nomes de isótopos
+* Busca de isótopos por símbolo químico
+* Filtros por estabilidade e modo de decaimento
+* Interface orientada a objetos com `Isotope`
+* Visualização com Matplotlib
+* Exportação de resultados para CSV e JSON
+* Testes automatizados com `pytest`
+* Análise de qualidade com `ruff`
+* CI com GitHub Actions
+
+## Requisitos
+
+* Python 3.11 ou superior
+* Poetry
 
 ## Instalação
 
@@ -22,13 +37,13 @@ git clone https://github.com/prifloriano/nucleonpy.git
 cd nucleonpy
 ```
 
-Instale o pacote em modo editável:
+Instale as dependências com Poetry:
 
 ```bash
 poetry install
 ```
 
-Ou, caso esteja usando `pip`:
+Também é possível instalar em modo editável com `pip`:
 
 ```bash
 pip install -e .
@@ -36,48 +51,108 @@ pip install -e .
 
 ## Uso rápido
 
-### Decaimento simples com orientação a objetos
+### Consultar um isótopo
 
 ```python
 from nucleonpy import Isotope
 
-cobalto = Isotope("Co-60")
+tritio = Isotope("H-3")
 
-tempo = 5 * 365 * 24 * 3600
-atividade = cobalto.get_remaining_activity(
-    initial_amount=1000,
-    time_elapsed=tempo,
-)
-
-print(f"Atividade restante: {atividade:.2f} Bq")
+print(tritio.name)
+print(tritio.atomic_number)
+print(tritio.half_life)
+print(tritio.decay_mode)
+print(tritio.is_stable)
+print(tritio.decay_constant)
 ```
 
-### Decaimento simples com função direta
+### Normalização de nomes de isótopos
+
+O `nucleonpy` aceita diferentes formas de escrever o nome de um isótopo. A entrada é normalizada automaticamente para o formato usado na base interna.
+
+Exemplos equivalentes para trítio:
+
+```python
+from nucleonpy import Isotope
+
+tritio_1 = Isotope("H-3")
+tritio_2 = Isotope("h-3")
+tritio_3 = Isotope("h3")
+tritio_4 = Isotope(" H-3 ")
+
+print(tritio_1.name)
+print(tritio_2.name)
+print(tritio_3.name)
+print(tritio_4.name)
+```
+
+Todas as chamadas acima são interpretadas como:
+
+```text
+H-3
+```
+
+Exemplos equivalentes para cobalto-60:
+
+```python
+from nucleonpy import Isotope
+
+cobalto_1 = Isotope("Co-60")
+cobalto_2 = Isotope("co-60")
+cobalto_3 = Isotope("CO60")
+cobalto_4 = Isotope("co60")
+
+print(cobalto_1.name)
+print(cobalto_2.name)
+print(cobalto_3.name)
+print(cobalto_4.name)
+```
+
+Todas as chamadas acima são normalizadas para:
+
+```text
+Co-60
+```
+
+### Calcular decaimento simples
 
 ```python
 from nucleonpy import calculate_remaining_activity
 
 atividade = calculate_remaining_activity(
-    initial_amount=1000,
-    half_life_seconds=5.27 * 365 * 24 * 3600,
-    time_elapsed_seconds=5 * 365 * 24 * 3600,
+    initial_amount=1000.0,
+    half_life_seconds=10.0,
+    time_elapsed_seconds=10.0,
 )
 
 print(atividade)
 ```
 
-### Cadeia de decaimento
+Após uma meia-vida, a quantidade restante será aproximadamente metade da quantidade inicial.
 
-Para simular uma cadeia linear do tipo pai, filho e produto final:
+### Calcular decaimento usando a classe `Isotope`
+
+```python
+from nucleonpy import Isotope
+
+tritio = Isotope("H-3")
+
+atividade = tritio.get_remaining_activity(
+    initial_amount=1000.0,
+    time_elapsed=5 * 365 * 24 * 3600,
+)
+
+print(atividade)
+```
+
+### Simular uma cadeia de decaimento
 
 ```python
 from nucleonpy import calculate_bateman_chain
 
-half_lives = [5.0, 10.0, float("inf")]
-
 resultados = calculate_bateman_chain(
     initial_amount=100.0,
-    half_lives_seconds=half_lives,
+    half_lives_seconds=[5.0, 10.0, float("inf")],
     time_elapsed_seconds=20.0,
 )
 
@@ -86,7 +161,21 @@ print(resultados)
 
 Use `float("inf")` para representar um produto final estável.
 
-### Visualização
+### Gerar gráfico da cadeia de decaimento
+
+```python
+from nucleonpy import plot_decay_chain
+
+fig, ax = plot_decay_chain(
+    initial_amount=100.0,
+    half_lives_seconds=[5.0, 10.0, float("inf")],
+    time_max_seconds=50.0,
+)
+
+fig.savefig("decay-chain.png", dpi=300)
+```
+
+Para exibir o gráfico imediatamente:
 
 ```python
 from nucleonpy import plot_decay_chain
@@ -95,40 +184,264 @@ plot_decay_chain(
     initial_amount=100.0,
     half_lives_seconds=[5.0, 10.0, float("inf")],
     time_max_seconds=50.0,
+    show=True,
 )
+```
+
+## Busca e filtros
+
+### Listar todos os isótopos disponíveis
+
+```python
+from nucleonpy import list_isotopes
+
+isotopos = list_isotopes()
+
+print(len(isotopos))
+print(isotopos[:10])
+```
+
+### Buscar isótopos por símbolo químico
+
+```python
+from nucleonpy import get_isotopes_by_symbol
+
+cobaltos = get_isotopes_by_symbol("Co")
+
+print(cobaltos.keys())
+```
+
+### Filtrar isótopos estáveis e radioativos
+
+```python
+from nucleonpy import get_radioactive_isotopes, get_stable_isotopes
+
+estaveis = get_stable_isotopes()
+radioativos = get_radioactive_isotopes()
+
+print(len(estaveis))
+print(len(radioativos))
+```
+
+### Filtrar por modo de decaimento
+
+```python
+from nucleonpy import get_isotopes_by_decay_mode
+
+beta_menos = get_isotopes_by_decay_mode("B-")
+
+print(beta_menos.keys())
+```
+
+## Exportação de resultados
+
+### Gerar série temporal
+
+```python
+from nucleonpy import generate_decay_chain_series
+
+serie = generate_decay_chain_series(
+    initial_amount=100.0,
+    half_lives_seconds=[5.0, 10.0, float("inf")],
+    time_max_seconds=50.0,
+    num_points=100,
+)
+
+print(serie[0])
+```
+
+### Exportar para CSV
+
+```python
+from nucleonpy import export_decay_chain_to_csv
+
+export_decay_chain_to_csv(
+    path="decay-chain.csv",
+    initial_amount=100.0,
+    half_lives_seconds=[5.0, 10.0, float("inf")],
+    time_max_seconds=50.0,
+    num_points=100,
+)
+```
+
+### Exportar para JSON
+
+```python
+from nucleonpy import export_decay_chain_to_json
+
+export_decay_chain_to_json(
+    path="decay-chain.json",
+    initial_amount=100.0,
+    half_lives_seconds=[5.0, 10.0, float("inf")],
+    time_max_seconds=50.0,
+    num_points=100,
+)
+```
+
+## Fonte dos dados
+
+A base interna de isótopos é gerada a partir da IAEA LiveChart of Nuclides.
+
+Fonte usada pelo script de atualização:
+
+```text
+https://www-nds.iaea.org/relnsd/v0/data?fields=ground_states&nuclides=all
+```
+
+O script responsável pela atualização da base está em:
+
+```text
+scripts/fetch_iaea.py
+```
+
+Ele gera os arquivos:
+
+```text
+src/nucleonpy/isotopes.json
+src/nucleonpy/isotopes_metadata.json
+```
+
+No arquivo `isotopes.json`, valores `null` em `half_life_seconds` representam isótopos estáveis ou registros sem meia-vida numérica disponível na fonte.
+
+Durante o carregamento da biblioteca, esses valores são convertidos para `math.inf`.
+
+## Atualizar a base de isótopos
+
+Execute:
+
+```bash
+poetry run python scripts/fetch_iaea.py
+```
+
+Depois valide os arquivos JSON:
+
+```bash
+python -m json.tool src/nucleonpy/isotopes.json > /dev/null
+python -m json.tool src/nucleonpy/isotopes_metadata.json > /dev/null
 ```
 
 ## Desenvolvimento
 
-Instale as dependências do projeto:
+### Instalar dependências
 
 ```bash
 poetry install
 ```
 
-Execute os testes:
+### Rodar testes
 
 ```bash
 poetry run pytest
 ```
 
-Execute o linter:
+A suíte de testes cobre:
+
+* Cálculo de decaimento simples
+* Validações de entrada
+* Cadeias de Bateman
+* Carregamento da base de isótopos
+* Normalização de nomes de isótopos
+* Busca e filtros
+* Classe `Isotope`
+* API pública do pacote
+* Visualização com Matplotlib
+* Exportação para CSV e JSON
+
+### Rodar lint com Ruff
 
 ```bash
 poetry run ruff check .
 ```
 
-## Status do projeto
+Para corrigir automaticamente o que for possível:
 
-Este projeto está em fase inicial de desenvolvimento.
+```bash
+poetry run ruff check . --fix
+```
 
-O objetivo da versão `0.1.0` é validar a estrutura principal da biblioteca, incluindo:
+### Rodar formatação com Ruff
 
-* API básica para isótopos
-* Cálculo de decaimento simples
-* Cálculo de cadeias lineares
-* Visualização inicial
-* Base interna de dados nucleares
+```bash
+poetry run ruff format .
+```
+
+Para apenas verificar se a formatação está correta:
+
+```bash
+poetry run ruff format --check .
+```
+
+### Rodar validação completa
+
+```bash
+poetry run ruff format .
+poetry run ruff check .
+poetry run pytest
+```
+
+## Build do pacote
+
+Para gerar os artefatos de distribuição:
+
+```bash
+poetry build
+```
+
+Os arquivos serão gerados na pasta:
+
+```text
+dist/
+```
+
+Para conferir se os arquivos de dados entraram no pacote:
+
+```bash
+tar -tzf dist/nucleonpy-0.1.0.tar.gz | grep isotopes
+```
+
+O resultado deve incluir:
+
+```text
+src/nucleonpy/isotopes.json
+src/nucleonpy/isotopes_metadata.json
+```
+
+## Estrutura do projeto
+
+```text
+nucleonpy/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── scripts/
+│   └── fetch_iaea.py
+├── src/
+│   └── nucleonpy/
+│       ├── __init__.py
+│       ├── calculus.py
+│       ├── core.py
+│       ├── data.py
+│       ├── export.py
+│       ├── isotopes.json
+│       ├── isotopes_metadata.json
+│       └── viz.py
+├── tests/
+├── README.md
+├── pyproject.toml
+└── LICENSE
+```
+
+## Comandos úteis
+
+```bash
+poetry install
+poetry run pytest
+poetry run ruff check .
+poetry run ruff check . --fix
+poetry run ruff format .
+poetry run ruff format --check .
+poetry build
+```
 
 ## Roadmap
 
@@ -136,19 +449,23 @@ O objetivo da versão `0.1.0` é validar a estrutura principal da biblioteca, in
 * [x] Cálculo de decaimento simples
 * [x] Cadeias de Bateman
 * [x] Base interna de isótopos
+* [x] Metadados da fonte de dados
 * [x] Visualização com Matplotlib
-* [ ] Testes automatizados
-* [ ] CI com GitHub Actions
-* [ ] Normalização de nomes de isótopos
-* [ ] Melhor tratamento para isótopos estáveis
-* [ ] Exportação de resultados
+* [x] Testes automatizados
+* [x] CI com GitHub Actions
+* [x] Normalização de nomes de isótopos
+* [x] Busca por símbolo químico
+* [x] Filtros por estabilidade e modo de decaimento
+* [x] Exportação de resultados
 * [ ] Documentação expandida
 * [ ] Publicação no PyPI
 
 ## Aviso
 
-O `nucleonpy` ainda está em fase alpha. Os resultados devem ser validados antes de qualquer uso acadêmico, técnico, médico, industrial ou regulatório.
+O `nucleonpy` ainda está em desenvolvimento.
+
+Os resultados devem ser validados antes de qualquer uso acadêmico, técnico, médico, industrial, regulatório ou profissional.
 
 ## Licença
 
-Licença a definir.
+MIT
