@@ -34,11 +34,8 @@ jobs:
       - name: Install Poetry
         run: pipx install poetry
 
-      - name: Configure Poetry
-        run: poetry config virtualenvs.create false
-
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --no-interaction
 
       - name: Run Ruff lint
         run: poetry run ruff check .
