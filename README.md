@@ -1,5 +1,7 @@
 # nucleonpy
 
+[![PyPI version](https://img.shields.io/pypi/v/nucleonpy.svg)](https://pypi.org/project/nucleonpy/)
+[![Python versions](https://img.shields.io/pypi/pyversions/nucleonpy.svg)](https://pypi.org/project/nucleonpy/)
 [![CI](https://github.com/prifloriano/nucleonpy/actions/workflows/ci.yml/badge.svg)](https://github.com/prifloriano/nucleonpy/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/prifloriano/nucleonpy)](https://github.com/prifloriano/nucleonpy/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -51,6 +53,12 @@ Também é possível instalar em modo editável com `pip`:
 
 ```bash
 pip install -e .
+```
+
+Ou
+
+```bash
+pip install nucleonpy
 ```
 
 ## Uso rápido
