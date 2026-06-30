@@ -7,7 +7,6 @@ def plot_decay_chain(initial_amount: float, half_lives_seconds: list[float], tim
     """
     Gera um gráfico estilo artigo científico para uma cadeia de decaimento.
     """
-    print("Calculando a matriz temporal... aguenta aí!")
     
     t_array = np.linspace(0, time_max_seconds, num_points)
     
