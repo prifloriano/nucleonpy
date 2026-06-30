@@ -1,17 +1,48 @@
 [tool.poetry]
 name = "nucleonpy"
 version = "0.1.0"
-description = "Biblioteca de física nuclear para cálculo de decaimento"
+description = "Biblioteca de física nuclear para cálculo de decaimento radioativo"
 authors = ["Priscila Floriano <priscilabflorian@icloud.com>"]
 readme = "README.md"
 repository = "https://github.com/prifloriano/nucleonpy"
-packages = [{include = "nucleonpy", from = "src"}]
+packages = [{ include = "nucleonpy", from = "src" }]
+include = ["src/nucleonpy/isotopes.json"]
+
+keywords = [
+    "physics",
+    "nuclear-physics",
+    "radioactive-decay",
+    "bateman-equations",
+    "scientific-computing"
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14"
+]
 
 [tool.poetry.dependencies]
-python = "^3.14"
-requests = "^2.31.0"
+python = ">=3.11,<4.0"
 matplotlib = "^3.9.0"
 numpy = "^2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+ruff = "^0.6.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
 
 [build-system]
 requires = ["poetry-core"]
