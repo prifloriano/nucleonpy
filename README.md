@@ -455,23 +455,6 @@ poetry run ruff format --check .
 poetry build
 ```
 
-## Roadmap
-
-* [x] Estrutura inicial do pacote
-* [x] Cálculo de decaimento simples
-* [x] Cadeias de Bateman
-* [x] Base interna de isótopos
-* [x] Metadados da fonte de dados
-* [x] Visualização com Matplotlib
-* [x] Testes automatizados
-* [x] CI com GitHub Actions
-* [x] Normalização de nomes de isótopos
-* [x] Busca por símbolo químico
-* [x] Filtros por estabilidade e modo de decaimento
-* [x] Exportação de resultados
-* [ ] Documentação expandida
-* [ ] Publicação no PyPI
-
 ## Aviso
 
 O `nucleonpy` ainda está em desenvolvimento.
