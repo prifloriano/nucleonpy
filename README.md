@@ -1,5 +1,9 @@
 # nucleonpy
 
+[![CI](https://github.com/prifloriano/nucleonpy/actions/workflows/ci.yml/badge.svg)](https://github.com/prifloriano/nucleonpy/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/prifloriano/nucleonpy)](https://github.com/prifloriano/nucleonpy/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 `nucleonpy` é uma biblioteca científica em Python para cálculo, consulta, simulação e visualização de decaimento radioativo.
 
 O pacote foi criado para facilitar análises envolvendo meia-vida, atividade remanescente, cadeias lineares de decaimento, equações de Bateman e dados nucleares obtidos a partir da IAEA.
