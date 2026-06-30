@@ -1,49 +1,115 @@
 # src/nucleonpy/calculus.py
+
 import math
 
-def calculate_remaining_activity(initial_amount: float, half_life_seconds: float, time_elapsed_seconds: float) -> float:
+
+def _validate_initial_amount(initial_amount: float) -> None:
+    if math.isnan(initial_amount) or initial_amount < 0:
+        raise ValueError("A quantidade inicial deve ser maior ou igual a zero.")
+
+
+def _validate_elapsed_time(time_elapsed_seconds: float) -> None:
+    if math.isnan(time_elapsed_seconds) or time_elapsed_seconds < 0:
+        raise ValueError("O tempo decorrido deve ser maior ou igual a zero.")
+
+
+def _validate_half_life(half_life_seconds: float) -> None:
+    if math.isnan(half_life_seconds) or half_life_seconds <= 0:
+        raise ValueError("A meia-vida deve ser maior que zero.")
+
+
+def calculate_remaining_activity(
+    initial_amount: float,
+    half_life_seconds: float,
+    time_elapsed_seconds: float,
+) -> float:
     """
-    Calculates the remaining amount or activity of a radioactive isotope after a given time.
+    Calcula a quantidade ou atividade restante de um isótopo radioativo.
 
     Args:
-        initial_amount (float): The initial quantity of the substance (e.g., mass, activity, or number of atoms).
-        half_life_seconds (float): The half-life of the isotope in seconds. Must be strictly positive.
-        time_elapsed_seconds (float): The time elapsed in seconds.
+        initial_amount: Quantidade inicial, atividade inicial ou número inicial de átomos.
+        half_life_seconds: Meia-vida do isótopo em segundos.
+            Use math.inf ou float("inf") para isótopos estáveis.
+        time_elapsed_seconds: Tempo decorrido em segundos.
 
     Returns:
-        float: The remaining amount of the substance after the elapsed time.
+        Quantidade ou atividade restante após o tempo informado.
 
     Raises:
-        ValueError: If half_life_seconds is less than or equal to zero.
+        ValueError: Se a quantidade inicial, meia-vida ou tempo forem inválidos.
     """
-    if half_life_seconds <= 0:
-        raise ValueError("Half-life must be a positive, non-zero value.")
+    _validate_initial_amount(initial_amount)
+    _validate_half_life(half_life_seconds)
+    _validate_elapsed_time(time_elapsed_seconds)
 
     decay_constant = math.log(2) / half_life_seconds
-    
-    remaining_amount = initial_amount * math.exp(-decay_constant * time_elapsed_seconds)
-    
-    return remaining_amount
+    return initial_amount * math.exp(-decay_constant * time_elapsed_seconds)
 
-def calculate_bateman_chain(initial_amount: float, half_lives_seconds: list[float], time_elapsed_seconds: float) -> list[float]:
+
+def _validate_decay_chain(
+    initial_amount: float,
+    half_lives_seconds: list[float],
+    time_elapsed_seconds: float,
+) -> None:
+    _validate_initial_amount(initial_amount)
+    _validate_elapsed_time(time_elapsed_seconds)
+
+    if not half_lives_seconds:
+        raise ValueError("Informe pelo menos uma meia-vida.")
+
+    for half_life in half_lives_seconds:
+        _validate_half_life(half_life)
+
+    for index, half_life in enumerate(half_lives_seconds[:-1]):
+        if math.isinf(half_life):
+            raise ValueError("Apenas o último isótopo da cadeia pode ser estável.")
+
+    finite_half_lives = [
+        half_life for half_life in half_lives_seconds if not math.isinf(half_life)
+    ]
+
+    for i, half_life in enumerate(finite_half_lives):
+        for other_half_life in finite_half_lives[i + 1 :]:
+            if math.isclose(half_life, other_half_life, rel_tol=1e-12):
+                raise ValueError(
+                    "Cadeias com meias-vidas iguais ou muito próximas ainda "
+                    "não são suportadas pela implementação atual."
+                )
+
+
+def calculate_bateman_chain(
+    initial_amount: float,
+    half_lives_seconds: list[float],
+    time_elapsed_seconds: float,
+) -> list[float]:
     """
-    Solves the Bateman equations for a linear decay chain (A -> B -> C -> ...).
+    Resolve as equações de Bateman para uma cadeia linear de decaimento.
+
+    A cadeia segue o formato A -> B -> C -> ... .
 
     Args:
-        initial_amount (float): Initial quantity of the parent isotope.
-        half_lives_seconds (list[float]): A list of half-lives in seconds for each isotope in the chain.
-                                          Use float('inf') for the final stable isotope.
-        time_elapsed_seconds (float): The time elapsed in seconds.
+        initial_amount: Quantidade inicial do isótopo pai.
+        half_lives_seconds: Lista de meias-vidas em segundos para cada isótopo.
+            Use math.inf ou float("inf") para o produto final estável.
+        time_elapsed_seconds: Tempo decorrido em segundos.
 
     Returns:
-        list[float]: The remaining amount of each isotope in the chain at the given time.
+        Lista com a quantidade de cada isótopo no tempo informado.
+
+    Raises:
+        ValueError: Se os parâmetros forem inválidos ou se a cadeia ainda não
+            for suportada pela implementação atual.
     """
-    lambdas = []
-    for hl in half_lives_seconds:
-        if hl > 0 and hl != float('inf'):
-            lambdas.append(math.log(2) / hl)
-        else:
-            lambdas.append(0.0) 
+    _validate_decay_chain(
+        initial_amount=initial_amount,
+        half_lives_seconds=half_lives_seconds,
+        time_elapsed_seconds=time_elapsed_seconds,
+    )
+
+    lambdas = [
+        0.0 if math.isinf(half_life) else math.log(2) / half_life
+        for half_life in half_lives_seconds
+    ]
 
     n_elements = len(lambdas)
     results = [0.0] * n_elements
@@ -54,16 +120,18 @@ def calculate_bateman_chain(initial_amount: float, half_lives_seconds: list[floa
             continue
 
         amount_n = 0.0
+
         for i in range(n + 1):
             denominator = 1.0
+
             for j in range(n + 1):
                 if i != j:
-                    denominator *= (lambdas[j] - lambdas[i])
+                    denominator *= lambdas[j] - lambdas[i]
 
-            if denominator != 0: 
-                amount_n += math.exp(-lambdas[i] * time_elapsed_seconds) / denominator
+            amount_n += math.exp(-lambdas[i] * time_elapsed_seconds) / denominator
 
         prod_lambdas = 1.0
+
         for i in range(n):
             prod_lambdas *= lambdas[i]
 

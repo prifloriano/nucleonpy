@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Biblioteca de física nuclear para cálculo de decaimento radioativo"
 authors = ["Priscila Floriano <priscilabflorian@icloud.com>"]
 readme = "README.md"
+license = "MIT"
 repository = "https://github.com/prifloriano/nucleonpy"
 packages = [{ include = "nucleonpy", from = "src" }]
 include = ["src/nucleonpy/isotopes.json"]
@@ -39,6 +40,7 @@ ruff = "^0.6.0"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 88
